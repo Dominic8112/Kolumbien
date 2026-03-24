@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html lang="de" style="background:#0d1117">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jass-Turnier 🃏</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0d1117 !important;color:#e6edf3 !important;font-family:'DM Sans',sans-serif;max-width:520px;margin:0 auto;padding:0 0 80px;min-height:100vh}
+
+/* ===== SETUP ===== */
+.setup{padding:20px 16px;background:#0d1117;color:#e6edf3}
+.setup-hero{text-align:center;padding:30px 0 20px}
+.setup-hero h1{font-size:28px;font-weight:700;color:#e7af3b}
+.setup-hero .sub{font-size:13px;color:#8b949e;margin-top:4px}
+.setup h2{font-size:14px;font-weight:700;color:#e7af3b;margin:16px 0 8px}
+.pi-row{display:flex;gap:8px;margin-bottom:8px}
+.pi-row input{flex:1;background:#161b22;border:1px solid #30363d;border-radius:8px;color:#e6edf3;font-size:14px;padding:10px 12px;font-family:‘DM Sans’}
+.pi-row input:focus{outline:none;border-color:#e7af3b}
+.pi-row input::placeholder{color:#484f58}
+.pi-row button{background:#e7af3b;color:#1a1a2e;border:none;border-radius:8px;font-weight:700;font-size:18px;width:44px;cursor:pointer;font-family:‘DM Sans’}
+.pl{margin:8px 0;display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:#161b22;border:1px solid #30363d;border-radius:20px;padding:6px 12px;font-size:13px;font-weight:500;color:#e6edf3}
+.chip .x{color:#484f58;cursor:pointer;font-size:16px;font-weight:700}.chip .x:hover{color:#f85149}
+.pcount{font-size:12px;color:#484f58;margin-top:4px}
+.ro{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#161b22;border:1px solid #30363d;border-radius:8px;margin-bottom:6px;cursor:pointer;color:#e6edf3}
+.ro.sel{border-color:#e7af3b;background:rgba(231,175,59,.08)}
+.ro .dot{width:18px;height:18px;border-radius:50%;border:2px solid #30363d;flex-shrink:0}
+.ro.sel .dot{border-color:#e7af3b;background:#e7af3b}
+.ro .rt{font-size:13px;font-weight:500;color:#e6edf3}
+.ro .rd{font-size:11px;color:#8b949e}
+.cr{display:none;align-items:center;gap:8px;margin-top:8px}
+.cr input{width:70px;background:#161b22;border:1px solid #30363d;border-radius:6px;color:#e7af3b;font-size:16px;font-weight:700;text-align:center;padding:8px;font-family:‘DM Sans’}
+.cr input:focus{outline:none;border-color:#e7af3b}
+.cr span{font-size:12px;color:#8b949e}
+.ib{background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:#8b949e;margin:12px 0}
+.sbtn{width:100%;padding:14px;background:#e7af3b;color:#1a1a2e;border:none;border-radius:10px;font-weight:700;font-size:16px;cursor:pointer;font-family:‘DM Sans’;margin-top:16px}
+.sbtn:disabled{opacity:.3;cursor:default}
+
+/* ===== APP ===== */
+.app{display:none;background:#0d1117;color:#e6edf3}
+.hero{background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:24px 16px 16px;text-align:center}
+.hero h1{font-size:22px;font-weight:700;color:#e7af3b}
+.hero .sub{font-size:12px;color:#8b949e;margin-top:3px}
+.pbar{height:5px;background:#21262d;border-radius:3px;margin:10px 0 2px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,#e7af3b,#f0c75e);border-radius:3px;transition:width .4s}
+.ptext{font-size:10px;color:#484f58}
+.tabs{display:flex;background:#161b22;position:sticky;top:0;z-index:10;border-bottom:1px solid #21262d}
+.tab{flex:1;padding:11px 0;text-align:center;font-size:12px;font-weight:700;color:#484f58;cursor:pointer;border-bottom:2px solid transparent;background:#161b22}
+.tab.active{color:#e7af3b;border-bottom-color:#e7af3b}
+.pnl{display:none;padding:12px;background:#0d1117}.pnl.active{display:block}
+
+.gc{background:#161b22;border:1px solid #21262d;border-radius:10px;margin-bottom:10px;overflow:hidden}
+.gh{display:flex;align-items:center;padding:10px 14px;cursor:pointer;gap:8px;background:#161b22;color:#e6edf3}
+.gnum{background:#0f3460;color:#e7af3b;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;flex-shrink:0}
+.gtitle{font-size:12px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e6edf3}
+.ghscore{font-size:12px;font-weight:700;color:#e7af3b;flex-shrink:0}
+.ghst{font-size:16px;flex-shrink:0}
+.gbody{display:none;padding:0 14px 14px;background:#161b22}.gbody.open{display:block}
+.pause{text-align:center;font-size:10px;color:#484f58;margin-bottom:10px;padding:4px;background:rgba(255,255,255,.02);border-radius:4px}
+.ans-hdr{display:flex;align-items:center;gap:6px;margin:12px 0 6px}
+.ans-badge{font-size:10px;font-weight:700;color:#e7af3b;background:rgba(231,175,59,.1);padding:2px 8px;border-radius:3px}
+.ans-who{font-size:11px;color:#8b949e}
+.srow{display:flex;gap:4px;align-items:center;margin-bottom:2px}
+.srow .tn{font-size:10px;font-weight:700;width:55px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow input{flex:1;background:#0d1117;border:1px solid #30363d;border-radius:5px;color:#e6edf3;font-size:15px;font-weight:700;text-align:center;padding:7px 4px;font-family:‘DM Sans’;max-width:65px}
+.srow input:focus{outline:none;border-color:#e7af3b}
+.srow input.auto{color:#484f58;border-style:dashed;background:#0a0d12}
+.srow .vslbl{color:#21262d;font-size:10px}
+.mrow{display:flex;gap:6px;margin:5px 0 6px;justify-content:center}
+.mbtn{font-size:10px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;border:1px solid #30363d;background:#161b22;color:#8b949e;transition:.15s}
+.mbtn.active{border-color:#f85149;background:rgba(248,81,73,.12);color:#f85149}
+.mbtn:active{transform:scale(.95)}
+.wtoggle{font-size:11px;color:#58a6ff;cursor:pointer;padding:3px 0;margin-top:2px}
+.wblock{display:none;margin:6px 0 10px;background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:8px}.wblock.open{display:block}
+.whdr{display:flex;justify-content:space-between;margin-bottom:4px;font-size:9px;font-weight:700;color:#8b949e}
+.wrow{display:flex;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.03)}.wrow:last-child{border-bottom:none}
+.wname{font-size:10px;flex:1;text-align:center;color:#8b949e}.wname .wp{color:#484f58;font-size:9px}
+.wcnt{display:flex;align-items:center;border-radius:4px;overflow:hidden;border:1px solid #30363d}
+.wcnt button{width:26px;height:26px;border:none;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:‘DM Sans’;background:#21262d;color:#8b949e}
+.wcnt button:active{background:#30363d}
+.wcnt .num{width:22px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#0d1117}
+.wcnt.t1 .num{color:#e7af3b}.wcnt.t2 .num{color:#58a6ff}
+.wcnt.t1.has{border-color:rgba(231,175,59,.5)}.wcnt.t2.has{border-color:rgba(88,166,255,.5)}
+.wsub{display:flex;justify-content:space-between;margin-top:6px;padding-top:5px;border-top:1px solid #21262d;font-size:10px;font-weight:700}
+.wsub .wt1{color:#e7af3b}.wsub .wt2{color:#58a6ff}
+.sep{height:1px;background:#21262d;margin:4px 0}
+.gtotal{background:rgba(231,175,59,.05);border-top:1px solid rgba(231,175,59,.15);padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.gtotal .gl{font-size:11px;color:#8b949e}
+.gtotal .s1{font-size:20px;font-weight:700;color:#e7af3b}
+.gtotal .s2{font-size:20px;font-weight:700;color:#58a6ff}
+.gtotal .vs{color:#21262d;margin:0 6px;font-size:12px}
+.gwintag{font-size:10px;font-weight:700;color:#3fb950;margin-top:2px}
+
+.rr{display:flex;align-items:center;padding:10px 14px;background:#161b22;border:1px solid #21262d;border-radius:10px;margin-bottom:6px}
+.rpos{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;margin-right:10px;flex-shrink:0}
+.r1{background:#e7af3b;color:#1a1a2e}.r2{background:#8b949e;color:#1a1a2e}.r3{background:#cd7f32;color:#fff}.ro{background:#21262d;color:#484f58}
+.rnm{font-weight:700;font-size:14px;flex:1;color:#e6edf3}
+.rst{text-align:right;font-size:11px;color:#8b949e}.rst .pp{font-size:16px;font-weight:700;color:#e7af3b;display:block}
+
+.sc{background:#161b22;border:1px solid #21262d;border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.sc h3{font-size:12px;color:#e7af3b;margin-bottom:6px}
+.sr{display:flex;justify-content:space-between;font-size:12px;padding:2px 0;color:#8b949e}.sr .v{font-weight:700;color:#e6edf3}
+.nbtn{width:100%;padding:10px;background:transparent;border:1px solid #f85149;color:#f85149;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-top:16px;font-family:‘DM Sans’}
+.empty{text-align:center;padding:40px 16px;color:#484f58;font-size:13px}
+.balance-info{background:#161b22;border:1px solid #21262d;border-radius:8px;padding:10px 14px;margin:12px 0;font-size:11px;color:#8b949e}
+.balance-info b{color:#e6edf3}
+</style>
+
+</head>
+<body style="background:#0d1117;color:#e6edf3">
+
+<!-- SETUP -->
+
+<div class="setup" id="SS">
+  <div class="setup-hero"><h1>🃏 Jass-Turnier</h1><div class="sub">Schieber · 157 Pkt · Match = 207 · Weisen</div></div>
+  <h2>👥 Spieler (min. 4, max. 10)</h2>
+  <div class="pi-row"><input type="text" id="ni" placeholder="Name eingeben..." maxlength="15" onkeydown="if(event.key==='Enter')addP()"><button onclick="addP()">+</button></div>
+  <div class="pl" id="plist"></div>
+  <div class="pcount" id="pcnt"></div>
+  <div id="rsec" style="display:none">
+    <h2>🔄 Anzahl Runden</h2>
+    <div id="ropts"></div>
+    <div class="cr" id="crow"><input type="number" id="cri" min="1" max="99" value="5" oninput="selC()"><span>Runden</span></div>
+    <div class="ib" id="rinfo"></div>
+    <div class="balance-info" id="balinfo"></div>
+  </div>
+  <button class="sbtn" id="sbtn" disabled onclick="startT()">🃏 Turnier starten</button>
+</div>
+
+<!-- APP -->
+
+<div class="app" id="AS">
+  <div class="hero"><h1>🃏 Jass-Turnier</h1><div class="sub" id="asub"></div><div class="pbar"><div class="pfill" id="pf"></div></div><div class="ptext"><span id="pc">0</span>/<span id="pt">0</span> Spiele</div></div>
+  <div class="tabs"><div class="tab active" onclick="stab('games',this)">🃏 Spiele</div><div class="tab" onclick="stab('rank',this)">🏆 Rangliste</div><div class="tab" onclick="stab('stats',this)">📊 Stats</div></div>
+  <div class="pnl active" id="p-games"></div>
+  <div class="pnl" id="p-rank"></div>
+  <div class="pnl" id="p-stats"></div>
+</div>
+
+<script>
+// ====== SETUP ======
+let sp=[],selR=0,rMode='';
+
+function addP(){const i=document.getElementById('ni'),n=i.value.trim();if(!n||sp.includes(n)||sp.length>=10){i.value='';return}sp.push(n);i.value='';i.focus();rSP();uRO()}
+function remP(i){sp.splice(i,1);rSP();uRO()}
+function rSP(){document.getElementById('plist').innerHTML=sp.map((n,i)=>'<span class="chip">'+n+'<span class="x" onclick="remP('+i+')">✕</span></span>').join('');document.getElementById('pcnt').textContent=sp.length+' Spieler'+(sp.length<4?' (noch '+(4-sp.length)+' nötig)':'')}
+
+function maxC(n){const t=[];for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)t.push([i,j]);let c=0;for(let a=0;a<t.length;a++)for(let b=a+1;b<t.length;b++){if(new Set([...t[a],...t[b]]).size===4)c++}return c}
+
+function uRO(){const n=sp.length,s=document.getElementById('rsec');if(n<4){s.style.display='none';document.getElementById('sbtn').disabled=true;return}
+s.style.display='';const mx=maxC(n),sh=Math.min(mx,Math.max(3,Math.ceil(n*1.5))),md=Math.min(mx,Math.ceil(mx/2));
+const opts=[{id:'all',l:'Alle Kombinationen',d:mx+' Runden',v:mx}];
+if(mx>8)opts.push({id:'med',l:'Mittleres Turnier',d:md+' Runden',v:md});
+if(mx>5)opts.push({id:'short',l:'Kurzes Turnier',d:sh+' Runden',v:sh});
+opts.push({id:'custom',l:'Eigene Anzahl',d:'Du bestimmst',v:0});
+document.getElementById('ropts').innerHTML=opts.map(o=>'<div class="ro'+(rMode===o.id?' sel':'')+'" onclick="selR2(\''+o.id+'\','+o.v+')"><div class="dot"></div><div><div class="rt">'+o.l+'</div><div class="rd">'+o.d+'</div></div></div>').join('');
+document.getElementById('crow').style.display=rMode==='custom'?'flex':'none';
+const nt=n*(n-1)/2;
+document.getElementById('rinfo').innerHTML='👥 '+n+' Spieler → '+nt+' mögliche 2er-Teams → max. '+mx+' Spiele. Pro Spiel spielen 4, '+(n-4)+' pausier'+(n-4===1?'t':'en')+'.';
+// Balance info
+if(selR>0){const gpp=Math.floor(selR*4/n),rem=selR*4%n;
+document.getElementById('balinfo').innerHTML='⚖️ Bei '+selR+' Runden: Jeder spielt <b>'+(rem?gpp+'–'+(gpp+1):gpp)+'x</b> (Total '+selR*4+' Spieler-Slots ÷ '+n+' Spieler)';}
+else document.getElementById('balinfo').innerHTML='';
+vStart()}
+
+function selR2(m,v){rMode=m;selR=m==='custom'?(parseInt(document.getElementById('cri').value)||5):v;uRO()}
+function selC(){rMode='custom';const v=parseInt(document.getElementById('cri').value),mx=maxC(sp.length);selR=Math.max(1,Math.min(mx,v||1));uRO()}
+function vStart(){document.getElementById('sbtn').disabled=!(sp.length>=4&&selR>0)}
+
+// ====== GENERATE BALANCED SCHEDULE ======
+function genSched(players,nr){
+  const n=players.length;
+  const teams=[];for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)teams.push([i,j]);
+  const matches=[];for(let a=0;a<teams.length;a++)for(let b=a+1;b<teams.length;b++){if(new Set([...teams[a],...teams[b]]).size===4)matches.push({t1:teams[a],t2:teams[b]})}
+
+  const sel=[];const pg=Array(n).fill(0);const used=new Set();
+
+  for(let r=0;r<nr;r++){
+    // Find match that minimizes max player games (most balanced)
+    let bestIdx=-1,bestMax=Infinity,bestSum=Infinity;
+    for(let mi=0;mi<matches.length;mi++){
+      // Prefer unused matches first
+      const penalty=used.has(mi)?1000:0;
+      const m=matches[mi];
+      const ps=[...m.t1,...m.t2];
+      const simGames=ps.map(p=>pg[p]+1);
+      const maxG=Math.max(...simGames)+penalty;
+      const sumG=simGames.reduce((a,b)=>a+b,0)+penalty;
+      if(maxG<bestMax||(maxG===bestMax&&sumG<bestSum)){bestMax=maxG;bestSum=sumG;bestIdx=mi}
+    }
+    const m=matches[bestIdx];
+    const allIn=new Set([...m.t1,...m.t2]);
+    const pa=[];for(let i=0;i<n;i++)if(!allIn.has(i))pa.push(i);
+    sel.push({t1:[...m.t1],t2:[...m.t2],pa,ans:[m.t1[0],m.t2[0],m.t1[1],m.t2[1]]});
+    m.t1.forEach(p=>pg[p]++);m.t2.forEach(p=>pg[p]++);
+    used.add(bestIdx);
+  }
+  return sel;
+}
+
+// ====== TOURNAMENT ======
+const NRM=157,MTC=207;
+const WS=[{id:'st',n:'Stöck',p:20},{id:'d3',n:'3 Gleiche',p:20},{id:'v4b',n:'4Gl(Buur)',p:200},{id:'v4n',n:'4Gl(Nell)',p:150},{id:'v4',n:'4 Gleiche',p:100},{id:'f3',n:'3 Folge',p:20},{id:'f4',n:'4 Folge',p:50},{id:'f5',n:'5 Folge',p:100}];
+
+let TN=null,D={};
+function sv(){localStorage.setItem('jt8_scores',JSON.stringify(D))}
+
+function loadT(){const s=localStorage.getItem('jt8_t'),d=localStorage.getItem('jt8_scores');if(s){TN=JSON.parse(s);D=d?JSON.parse(d):{};showApp();return true}return false}
+
+function startT(){
+  const sched=genSched(sp,selR);
+  TN={players:[...sp],rounds:sched,nr:selR};D={};
+  localStorage.setItem('jt8_t',JSON.stringify(TN));localStorage.setItem('jt8_scores','{}');
+  showApp();
+}
+
+function newT(){if(!confirm('Turnier beenden und neu starten?'))return;TN=null;D={};localStorage.removeItem('jt8_t');localStorage.removeItem('jt8_scores');document.getElementById('AS').style.display='none';document.getElementById('SS').style.display='';rSP();uRO()}
+
+function showApp(){
+  document.getElementById('SS').style.display='none';
+  const as=document.getElementById('AS');as.style.display='block';
+  document.getElementById('asub').textContent=TN.players.length+' Spieler · '+TN.nr+' Spiele · 4 Ansagen';
+  document.getElementById('pt').textContent=TN.nr;
+  renderG();uPr();
+}
+
+function stab(id,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('active'));el.classList.add('active');document.getElementById('p-'+id).classList.add('active');if(id==='rank')rRk();if(id==='stats')rSt()}
+function tog(i){document.getElementById('gb-'+i).classList.toggle('open')}
+function togW(g,r){document.getElementById('wb-'+g+'-'+r).classList.toggle('open')}
+function rd(g,r){const k=g+'-'+r;if(!D[k])D[k]={s1:null,s2:null,m:0,e:null,w:{}};return D[k]}
+
+function setS(gi,ri,t){const r=rd(gi,ri);if(r.m)return;const el=document.getElementById('i-'+gi+'-'+ri+'-'+t);const v=parseInt(el.value);
+if(isNaN(v)||el.value===''){r.s1=null;r.s2=null;r.e=null}else{const c=Math.max(0,Math.min(NRM,v));if(t==='s1'){r.s1=c;r.s2=NRM-c;r.e='s1'}else{r.s2=c;r.s1=NRM-c;r.e='s2'}}
+sv();uDisp(gi,ri);uTot(gi)}
+
+function setM(gi,ri,tm){const r=rd(gi,ri);if(r.m===tm){r.m=0;r.s1=null;r.s2=null;r.e=null}else{r.m=tm;if(tm===1){r.s1=MTC;r.s2=0}else{r.s2=MTC;r.s1=0}r.e=null}
+sv();uDisp(gi,ri);uTot(gi)}
+
+function uDisp(gi,ri){const r=rd(gi,ri);const i1=document.getElementById('i-'+gi+'-'+ri+'-s1'),i2=document.getElementById('i-'+gi+'-'+ri+'-s2');if(!i1)return;
+i1.value=r.s1!==null?r.s1:'';i2.value=r.s2!==null?r.s2:'';
+i1.className=i1.className.replace(' auto','');i2.className=i2.className.replace(' auto','');
+if(r.m){i1.className+=' auto';i2.className+=' auto'}else if(r.e==='s1')i2.className+=' auto';else if(r.e==='s2')i1.className+=' auto';
+i1.readOnly=!!r.m;i2.readOnly=!!r.m;
+const b1=document.getElementById('mb-'+gi+'-'+ri+'-1'),b2=document.getElementById('mb-'+gi+'-'+ri+'-2');
+if(b1){b1.className='mbtn'+(r.m===1?' active':'');b2.className='mbtn'+(r.m===2?' active':'')}}
+
+function adjW(gi,ri,wid,tm,d){const r=rd(gi,ri);if(!r.w)r.w={};const k=wid+'-'+tm;r.w[k]=Math.max(0,Math.min(9,(r.w[k]||0)+d));if(!r.w[k])delete r.w[k];sv();
+const ne=document.getElementById('wn-'+gi+'-'+ri+'-'+wid+'-'+tm);if(ne)ne.textContent=r.w[k]||0;
+const ce=document.getElementById('wc-'+gi+'-'+ri+'-'+wid+'-'+tm);if(ce)ce.classList.toggle('has',(r.w[k]||0)>0);
+uWS(gi,ri);uTot(gi)}
+
+function gW(gi,ri){const r=rd(gi,ri);let w1=0,w2=0;if(!r.w)return{w1,w2};Object.entries(r.w).forEach(([k,c])=>{const p=k.split('-'),wid=p[0],tm=parseInt(p[1]),wt=WS.find(x=>x.id===wid);if(wt&&c){if(tm===1)w1+=wt.p*c;else w2+=wt.p*c}});return{w1,w2}}
+
+function uWS(gi,ri){const{w1,w2}=gW(gi,ri);const el=document.getElementById('wsub-'+gi+'-'+ri);const g=TN.rounds[gi],P=TN.players;const s1=P[g.t1[0]][0]+P[g.t1[1]][0],s2=P[g.t2[0]][0]+P[g.t2[1]][0];if(el)el.innerHTML='<span class="wt1">'+s1+': '+(w1?'+'+w1:'0')+'</span><span class="wt2">'+s2+': '+(w2?'+'+w2:'0')+'</span>'}
+
+function gTot(gi){let s1=0,s2=0,ok=true,any=false;for(let ri=0;ri<4;ri++){const r=rd(gi,ri);if(r.s1===null&&r.s2===null){ok=false;continue}any=true;s1+=(r.s1||0);s2+=(r.s2||0);const{w1,w2}=gW(gi,ri);s1+=w1;s2+=w2}return{s1,s2,ok,any}}
+
+function uTot(gi){const t=gTot(gi);const el=document.getElementById('gt-'+gi);const g=TN.rounds[gi],P=TN.players;const n1=P[g.t1[0]]+' & '+P[g.t1[1]],n2=P[g.t2[0]]+' & '+P[g.t2[1]];
+let w='';if(t.any){w=t.s1>t.s2?'🏆 '+n1:t.s2>t.s1?'🏆 '+n2:'Gleichstand'}
+if(el)el.innerHTML='<div><div class="gl">'+(t.ok?'✅ Endstand':t.any?'⏳ Zwischenstand':'')+'</div>'+(w?'<div class="gwintag">'+w+'</div>':'')+'</div><div><span class="s1">'+t.s1+'</span><span class="vs"> : </span><span class="s2">'+t.s2+'</span></div>';
+const hs=document.getElementById('hs-'+gi);if(hs)hs.textContent=t.any?t.s1+':'+t.s2:'';const hst=document.getElementById('hst-'+gi);if(hst)hst.textContent=t.ok?'✅':t.any?'⏳':'';uPr()}
+
+function uPr(){let d=0;for(let i=0;i<TN.nr;i++)if(gTot(i).ok)d++;document.getElementById('pc').textContent=d;document.getElementById('pf').style.width=(d/TN.nr*100)+'%'}
+
+function renderG(){
+  const P=TN.players;let h='';
+  TN.rounds.forEach((g,gi)=>{
+    const n1=P[g.t1[0]]+' & '+P[g.t1[1]],n2=P[g.t2[0]]+' & '+P[g.t2[1]];
+    const s1=P[g.t1[0]][0]+'+'+P[g.t1[1]][0],s2=P[g.t2[0]][0]+'+'+P[g.t2[1]][0];
+    const pa=g.pa.length?g.pa.map(i=>P[i]).join(' & '):'—';const t=gTot(gi);
+    h+='<div class="gc"><div class="gh" onclick="tog('+gi+')"><span class="gnum">S'+(gi+1)+'</span><span class="gtitle">'+n1+' vs '+n2+'</span><span class="ghscore" id="hs-'+gi+'">'+(t.any?t.s1+':'+t.s2:'')+'</span><span class="ghst" id="hst-'+gi+'">'+(t.ok?'✅':t.any?'⏳':'')+'</span></div>';
+    h+='<div class="gbody" id="gb-'+gi+'">'+(g.pa.length?'<div class="pause">⏸ '+pa+' pausiert</div>':'');
+    for(let ri=0;ri<4;ri++){const ans=g.ans[ri];const r=rd(gi,ri);const{w1,w2}=gW(gi,ri);const im=!!r.m;const a1=r.e==='s2'||im;const a2=r.e==='s1'||im;
+      h+='<div class="ans-hdr"><span class="ans-badge">Ansage '+(ri+1)+'</span><span class="ans-who">🎯 '+P[ans]+' sagt an</span></div>';
+      h+='<div class="srow"><span class="tn" style="color:#e7af3b">'+s1+'</span><input id="i-'+gi+'-'+ri+'-s1" type="number" inputmode="numeric" placeholder="Pkt"'+(a1?' class="auto"':'')+(im?' readonly':'')+' value="'+(r.s1!==null?r.s1:'')+'" onfocus="this.select()" oninput="setS('+gi+','+ri+',\'s1\')"><span class="vslbl">:</span><input id="i-'+gi+'-'+ri+'-s2" type="number" inputmode="numeric" placeholder="Pkt"'+(a2?' class="auto"':'')+(im?' readonly':'')+' value="'+(r.s2!==null?r.s2:'')+'" onfocus="this.select()" oninput="setS('+gi+','+ri+',\'s2\')"><span class="tn" style="color:#58a6ff;text-align:right">'+s2+'</span></div>';
+      h+='<div class="mrow"><div class="mbtn'+(r.m===1?' active':'')+'" id="mb-'+gi+'-'+ri+'-1" onclick="setM('+gi+','+ri+',1)">💥 Match '+s1+'</div><div class="mbtn'+(r.m===2?' active':'')+'" id="mb-'+gi+'-'+ri+'-2" onclick="setM('+gi+','+ri+',2)">💥 Match '+s2+'</div></div>';
+      h+='<div class="wtoggle" onclick="togW('+gi+','+ri+')">+ Weisen</div><div class="wblock" id="wb-'+gi+'-'+ri+'"><div class="whdr"><span style="color:#e7af3b">'+s1+'</span><span>Weis</span><span style="color:#58a6ff">'+s2+'</span></div>';
+      WS.forEach(wt=>{const c1=(r.w&&r.w[wt.id+'-1'])||0,c2=(r.w&&r.w[wt.id+'-2'])||0;
+        h+='<div class="wrow"><div class="wcnt t1'+(c1?' has':'')+'" id="wc-'+gi+'-'+ri+'-'+wt.id+'-1"><button onclick="adjW('+gi+','+ri+',\''+wt.id+'\',1,-1)">−</button><div class="num" id="wn-'+gi+'-'+ri+'-'+wt.id+'-1">'+c1+'</div><button onclick="adjW('+gi+','+ri+',\''+wt.id+'\',1,1)">+</button></div><div class="wname">'+wt.n+' <span class="wp">'+wt.p+'</span></div><div class="wcnt t2'+(c2?' has':'')+'" id="wc-'+gi+'-'+ri+'-'+wt.id+'-2"><button onclick="adjW('+gi+','+ri+',\''+wt.id+'\',2,-1)">−</button><div class="num" id="wn-'+gi+'-'+ri+'-'+wt.id+'-2">'+c2+'</div><button onclick="adjW('+gi+','+ri+',\''+wt.id+'\',2,1)">+</button></div></div>'});
+      h+='<div class="wsub" id="wsub-'+gi+'-'+ri+'"><span class="wt1">'+s1+': '+(w1?'+'+w1:'0')+'</span><span class="wt2">'+s2+': '+(w2?'+'+w2:'0')+'</span></div></div>';
+      if(ri<3)h+='<div class="sep"></div>'}
+    let wt='';if(t.any){wt=t.s1>t.s2?'🏆 '+n1:t.s2>t.s1?'🏆 '+n2:'Gleichstand'}
+    h+='<div class="gtotal" id="gt-'+gi+'"><div><div class="gl">'+(t.ok?'✅ Endstand':t.any?'⏳ Zwischenstand':'')+'</div>'+(wt?'<div class="gwintag">'+wt+'</div>':'')+'</div><div><span class="s1">'+t.s1+'</span><span class="vs"> : </span><span class="s2">'+t.s2+'</span></div></div></div></div>'});
+  document.getElementById('p-games').innerHTML=h}
+
+function pS(){const P=TN.players,s={};P.forEach((n,i)=>s[i]={n,w:0,l:0,d:0,f:0,a:0,g:0,tp:0,weis:0,mc:0});
+  for(let gi=0;gi<TN.nr;gi++){const g=TN.rounds[gi],t=gTot(gi);if(!t.any)continue;const win=t.s1>t.s2?1:t.s2>t.s1?2:0;let tw1=0,tw2=0,m1=0,m2=0;
+    for(let ri=0;ri<4;ri++){const{w1,w2}=gW(gi,ri);tw1+=w1;tw2+=w2;const r=rd(gi,ri);if(r.m===1)m1++;if(r.m===2)m2++}
+    g.t1.forEach(p=>{s[p].g++;s[p].f+=t.s1;s[p].a+=t.s2;s[p].weis+=tw1;s[p].mc+=m1;if(win===1){s[p].w++;s[p].tp+=3}else if(win===0&&t.ok){s[p].d++;s[p].tp+=1}else if(win===2)s[p].l++});
+    g.t2.forEach(p=>{s[p].g++;s[p].f+=t.s2;s[p].a+=t.s1;s[p].weis+=tw2;s[p].mc+=m2;if(win===2){s[p].w++;s[p].tp+=3}else if(win===0&&t.ok){s[p].d++;s[p].tp+=1}else if(win===1)s[p].l++})}return s}
+
+function rRk(){const s=pS();const so=Object.values(s).sort((a,b)=>b.tp!==a.tp?b.tp-a.tp:(b.f-b.a)-(a.f-a.a));
+  if(so.every(x=>!x.g)){document.getElementById('p-rank').innerHTML='<div class="empty">Noch keine Resultate 🃏</div>';return}
+  let h='';so.forEach((s,i)=>{const d=s.f-s.a;const c=i===0?'r1':i===1?'r2':i===2?'r3':'ro';
+    h+='<div class="rr"><div class="rpos '+c+'">'+(i+1)+'</div><div class="rnm">'+(i===0?'👑 ':'')+s.n+'</div><div class="rst"><span class="pp">'+s.tp+' Pkt</span>'+s.w+'S '+s.d+'U '+s.l+'N · '+(d>=0?'+':'')+d+'</div></div>'});
+  document.getElementById('p-rank').innerHTML=h}
+
+function rSt(){const s=pS();const so=Object.values(s).sort((a,b)=>b.tp-a.tp);let dn=0;for(let i=0;i<TN.nr;i++)if(gTot(i).ok)dn++;
+  let h='<div class="sc"><h3>📊 Fortschritt</h3><div class="sr"><span>Spiele</span><span class="v">'+dn+'/'+TN.nr+'</span></div><div class="sr"><span>Ansagen</span><span class="v">'+(dn*4)+'/'+(TN.nr*4)+'</span></div><div class="pbar"><div class="pfill" style="width:'+(dn/TN.nr*100)+'%"></div></div></div>';
+  if(so.some(x=>x.g)){const bf=Object.values(s).filter(x=>x.g).sort((a,b)=>(b.f/b.g)-(a.f/a.g))[0];const bw=Object.values(s).filter(x=>x.g).sort((a,b)=>(b.w/b.g)-(a.w/a.g))[0];const bweis=Object.values(s).filter(x=>x.g).sort((a,b)=>b.weis-a.weis)[0];const bm=Object.values(s).filter(x=>x.g).sort((a,b)=>b.mc-a.mc)[0];
+    h+='<div class="sc"><h3>🏆 Highlights</h3><div class="sr"><span>Leader</span><span class="v">'+so[0].n+' ('+so[0].tp+')</span></div><div class="sr"><span>Bester Ø</span><span class="v">'+bf.n+' ('+Math.round(bf.f/bf.g)+')</span></div><div class="sr"><span>Siegquote</span><span class="v">'+bw.n+' ('+Math.round(bw.w/bw.g*100)+'%)</span></div><div class="sr"><span>Weis-König</span><span class="v">'+bweis.n+' ('+bweis.weis+')</span></div>';
+    if(bm.mc>0)h+='<div class="sr"><span>Match-König 💥</span><span class="v">'+bm.n+' ('+bm.mc+'x)</span></div>';h+='</div>';
+    h+='<div class="sc"><h3>👤 Details</h3>';so.forEach(x=>{h+='<div style="padding:5px 0;border-bottom:1px solid #21262d"><div style="font-weight:700;font-size:13px;color:#e6edf3">'+x.n+'</div><div class="sr"><span>Spiele · S/U/N</span><span class="v">'+x.g+' · '+x.w+'/'+x.d+'/'+x.l+'</span></div><div class="sr"><span>Ø Punkte</span><span class="v">'+(x.g?Math.round(x.f/x.g):0)+'</span></div><div class="sr"><span>Weis / Match</span><span class="v">'+x.weis+' / '+x.mc+'x💥</span></div><div class="sr"><span>Differenz</span><span class="v">'+(x.f-x.a>=0?'+':'')+(x.f-x.a)+'</span></div></div>'});h+='</div>'}
+  else h+='<div class="empty">Stats nach dem ersten Spiel 📊</div>';
+  h+='<button class="nbtn" onclick="newT()">🔄 Neues Turnier starten</button>';
+  document.getElementById('p-stats').innerHTML=h}
+
+// ====== INIT ======
+if(!loadT()){sp=['Dominic','Ricci','Tamara','Adi','Nicole','Marc'];rSP();uRO()}
+</script>
+
+</body>
+</html>
